@@ -10,6 +10,8 @@ import { MenuItem as MenuItemType } from "../types";
 import CheckoutButton from "@/components/CheckoutButton";
 import { UserFormData } from "@/forms/user-profile-form/UserProfileForm";
 import { useCreateCheckoutSession } from "@/api/OrderApi";
+import { toast } from "sonner";
+import { displayRazorPay } from "@/lib/RazerPayGatewayHandler";
 
 export type CartItem = {
   _id: string;
@@ -79,7 +81,20 @@ const DetailPage = () => {
     });
   };
 
-  const onCheckout = async (userFormData: UserFormData) => {
+  const getTotalCost = () => {
+    const totalInPence = cartItems.reduce(
+      (total, cartItem) => total + cartItem.price * cartItem.quantity,
+      0
+    );
+
+    if(!restaurant) return 0
+
+    const totalWithDelivery = totalInPence + restaurant.deliveryPrice;
+
+    return +((totalWithDelivery / 100).toFixed(2));
+  };
+
+  const onCheckout = async (userFormData: UserFormData, IsOnlinePayment?: boolean) => {
     if (!restaurant) {
       return;
     }
@@ -98,10 +113,15 @@ const DetailPage = () => {
         country: userFormData.country,
         email: userFormData.email as string,
       },
+      totalAmount:getTotalCost()
     };
 
-    const data = await createCheckoutSession(checkoutData);
-    window.location.href = data.url;
+    if(IsOnlinePayment) {
+      await displayRazorPay(getTotalCost(), createCheckoutSession(checkoutData))
+    } else {
+      await createCheckoutSession(checkoutData);
+      toast.success("Order placed successfully");
+    }
   };
 
   if (isLoading || !restaurant) {
@@ -116,7 +136,7 @@ const DetailPage = () => {
           className="rounded-md object-cover h-full w-full"
         />
       </AspectRatio>
-      <div className="grid md:grid-cols-[4fr_2fr] gap-5 md:px-32">
+      <div className="grid md:grid-cols-[4fr_2fr] gap-5">
         <div className="flex flex-col gap-4">
           <RestaurantInfo restaurant={restaurant} />
           <span className="text-2xl font-bold tracking-tight">Menu</span>

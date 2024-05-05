@@ -13,7 +13,7 @@ const MenuItem = ({ menuItem, addToCart }: Props) => {
         <CardTitle>{menuItem.name}</CardTitle>
       </CardHeader>
       <CardContent className="font-bold">
-        £{(menuItem.price / 100).toFixed(2)}
+        Rs.{(menuItem.price / 100).toFixed(2)}
       </CardContent>
     </Card>
   );

@@ -28,10 +28,12 @@ export type UserFormData = z.infer<typeof formSchema>;
 
 type Props = {
   currentUser: User;
-  onSave: (userProfileData: UserFormData) => void;
+  onSave:  (userFormData: UserFormData, IsOnlinePayment?: boolean|undefined) => void;
   isLoading: boolean;
   title?: string;
   buttonText?: string;
+  secondaryButtonText?: string;
+  onSecondaryClickHandler?: () => void;
 };
 
 const UserProfileForm = ({
@@ -40,6 +42,7 @@ const UserProfileForm = ({
   currentUser,
   title = "User Profile",
   buttonText = "Submit",
+  secondaryButtonText,
 }: Props) => {
   const form = useForm<UserFormData>({
     resolver: zodResolver(formSchema),
@@ -53,7 +56,10 @@ const UserProfileForm = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSave)}
+        onSubmit={(e) => {
+          e.preventDefault()
+          onSave(form.getValues(), false)
+        }}
         className="space-y-4 bg-gray-50 rounded-lg md:p-10"
       >
         <div>
@@ -136,6 +142,18 @@ const UserProfileForm = ({
           <Button type="submit" className="bg-orange-500">
             {buttonText}
           </Button>
+        )}
+
+        {secondaryButtonText && (
+          <>
+            {isLoading ? (
+              <LoadingButton />
+            ) : (
+              <Button type="button" onClick={() => onSave(form.getValues(), true)} className="bg-orange-500 ml-4">
+                {secondaryButtonText}
+              </Button>
+            )}
+          </>
         )}
       </form>
     </Form>

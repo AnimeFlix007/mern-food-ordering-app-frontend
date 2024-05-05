@@ -9,7 +9,7 @@ import UserProfileForm, {
 import { useGetMyUser } from "@/api/MyUserApi";
 
 type Props = {
-  onCheckout: (userFormData: UserFormData) => void;
+  onCheckout:  (userFormData: UserFormData, IsOnlinePayment?: boolean) => Promise<void>
   disabled: boolean;
   isLoading: boolean;
 };
@@ -58,7 +58,8 @@ const CheckoutButton = ({ onCheckout, disabled, isLoading }: Props) => {
           onSave={onCheckout}
           isLoading={isGetUserLoading}
           title="Confirm Deliery Details"
-          buttonText="Continue to payment"
+          buttonText="Cash on Delivery"
+          secondaryButtonText="Online Payment"
         />
       </DialogContent>
     </Dialog>
